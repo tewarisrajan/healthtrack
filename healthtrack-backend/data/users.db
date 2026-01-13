@@ -1,0 +1,3 @@
+{"name":"Demo User","email":"demo@healthtrack.com","password":"demo123","abhaId":"12-3456-7890-1234","_id":"ujBYkQmhDoEpugsB"}
+{"$$indexCreated":{"fieldName":"email","unique":true,"sparse":false}}
+{"$$indexCreated":{"fieldName":"email","unique":true}}

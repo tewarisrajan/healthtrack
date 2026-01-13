@@ -1,0 +1,3 @@
+{"user":"ujBYkQmhDoEpugsB","name":"Demo User","bloodGroup":"B+","allergies":["Penicillin"],"chronicConditions":["Asthma"],"medications":["Inhaler (Salbutamol)"],"emergencyContacts":[{"name":"Mother","relation":"Parent","phone":"+91-98XXXXXX01"}],"updatedAt":{"$$date":1768309226019},"_id":"SlXg6AGBz1ctuJeu"}
+{"$$indexCreated":{"fieldName":"user","unique":true,"sparse":false}}
+{"$$indexCreated":{"fieldName":"user","unique":true}}
