@@ -1,6 +1,7 @@
-// src/App.tsx
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
 import AppLayout from "./components/layout/AppLayout";
+import PageTransition from "./components/layout/PageTransition";
 import DashboardPage from "./routes/DashboardPage";
 import RecordsPage from "./routes/RecordsPage";
 import RecordDetailsPage from "./routes/RecordDetailsPage";
@@ -14,6 +15,7 @@ import { useAuth } from "./context/AuthContext";
 
 function App() {
   const { user, loading } = useAuth();
+  const location = useLocation();
 
   // While we check localStorage, show a small loader
   if (loading) {
@@ -32,17 +34,75 @@ function App() {
   // Authenticated view
   return (
     <AppLayout>
-      <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/records" element={<RecordsPage />} />
-        <Route path="/records/upload" element={<UploadRecordPage />} />
-        <Route path="/records/:id" element={<RecordDetailsPage />} />
-        <Route path="/emergency" element={<EmergencyPage />} />
-        <Route path="/consent" element={<ConsentPage />} />
-        <Route path="/family" element={<FamilyPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
-      </Routes>
+      <AnimatePresence mode="wait">
+        <Routes location={location} key={location.pathname}>
+          <Route path="/" element={<Navigate to="/dashboard" />} />
+          <Route
+            path="/dashboard"
+            element={
+              <PageTransition>
+                <DashboardPage />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/records"
+            element={
+              <PageTransition>
+                <RecordsPage />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/records/upload"
+            element={
+              <PageTransition>
+                <UploadRecordPage />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/records/:id"
+            element={
+              <PageTransition>
+                <RecordDetailsPage />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/emergency"
+            element={
+              <PageTransition>
+                <EmergencyPage />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/consent"
+            element={
+              <PageTransition>
+                <ConsentPage />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/family"
+            element={
+              <PageTransition>
+                <FamilyPage />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <PageTransition>
+                <SettingsPage />
+              </PageTransition>
+            }
+          />
+        </Routes>
+      </AnimatePresence>
     </AppLayout>
   );
 }

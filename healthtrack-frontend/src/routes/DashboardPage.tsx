@@ -1,151 +1,92 @@
-import { motion } from "framer-motion";
-import Card from "../components/ui/Card";
+import { useAuth } from "../context/AuthContext";
 import { useHealthTrack } from "../context/HealthTrackContext";
+import Card from "../components/ui/Card";
 import RecordsOverTimeChart from "../components/dashboard/RecordsOverTimeChart";
+import HealthScoreWidget from "../components/dashboard/HealthScoreWidget";
+import QuickActions from "../components/dashboard/QuickActions";
+import { motion } from "framer-motion";
 
 export default function DashboardPage() {
-  const { records, emergencyProfile, consentRequests, family } =
-    useHealthTrack();
+  const { user } = useAuth();
+  const { records } = useHealthTrack();
 
+  // Calculate dynamic stats
   const totalRecords = records.length;
-  const pendingConsents = consentRequests.filter(
-    (c) => c.status === "PENDING"
-  ).length;
+  const lastRecordDate = records.length > 0
+    ? new Date(records[0].createdAt).toLocaleDateString()
+    : "N/A";
 
-  // Simple "profile completeness" score
-  let completeness = 0;
-  if (totalRecords > 0) completeness += 40;
-  if (emergencyProfile) completeness += 30;
-  if (family.length > 0) completeness += 20;
-  if (consentRequests.length > 0) completeness += 10;
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.05, // Faster stagger
+        delayChildren: 0.1,    // Shorter initial delay
+      }
+    }
+  };
 
-  const recentRecords = records.slice(0, 5);
+  const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
+  };
 
   return (
-    <div className="space-y-6">
-      <motion.h1
-        className="text-2xl font-semibold text-slate-800 dark:text-slate-100"
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        Overview
-      </motion.h1>
-
-      {/* Stats cards */}
-      <motion.div
-        className="grid md:grid-cols-4 gap-4"
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.05 }}
-      >
-        <Card
-          label="Total Records"
-          value={totalRecords.toString()}
-          helper="All health documents you’ve stored"
-        />
-        <Card
-          label="Pending Consents"
-          value={pendingConsents.toString()}
-          helper="Requests from hospitals or insurers"
-        />
-        <Card
-          label="Emergency Profile"
-          value={emergencyProfile ? "Configured" : "Not set"}
-          helper={
-            emergencyProfile
-              ? "Ready to use in emergencies"
-              : "Set it up in Emergency tab"
-          }
-        />
-        <Card
-          label="Family Profiles"
-          value={family.length.toString()}
-          helper="Dependents linked to your account"
-        />
-      </motion.div>
-
-      {/* Completeness + chart */}
-      <motion.div
-        className="grid md:grid-cols-2 gap-6"
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-      >
-        <div className="bg-white dark:bg-slate-900 border border-transparent dark:border-slate-800 rounded-xl shadow-sm p-4">
-          <h2 className="font-semibold text-slate-800 dark:text-slate-100 mb-2 text-sm">
-            Profile completeness
-          </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">
-            Improve this by adding records, configuring emergency profile, and
-            linking family.
+    <motion.div
+      className="space-y-6"
+      variants={container}
+      initial="hidden"
+      animate="show"
+    >
+      <div className="flex items-end justify-between">
+        <div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-400 bg-clip-text text-transparent">
+            Overview
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1">
+            Welcome back, here's your health summary.
           </p>
-          <div className="w-full h-3 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-teal-500 to-emerald-500 transition-all duration-500"
-              style={{ width: `${completeness}%` }}
-            />
+        </div>
+      </div>
+
+      {/* Bento Grid Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+
+        {/* Main Stats - Spans 2 cols */}
+        <motion.div variants={item} className="md:col-span-2 grid grid-cols-2 gap-4">
+          <Card
+            label="Total Records"
+            value={totalRecords.toString()}
+            helper="All time"
+          />
+          <Card
+            label="Last Activity"
+            value={lastRecordDate}
+            helper="Most recent upload"
+          />
+        </motion.div>
+
+        {/* Health Score - Spans 1 col */}
+        <motion.div variants={item} className="h-48 md:h-auto">
+          <HealthScoreWidget />
+        </motion.div>
+
+        {/* Quick Actions - Spans 1 col */}
+        <motion.div variants={item} className="h-48 md:h-auto">
+          <QuickActions />
+        </motion.div>
+
+        {/* Chart - Wide span */}
+        <motion.div variants={item} className="md:col-span-3 lg:col-span-4 glass-card rounded-3xl p-6">
+          <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-6 px-2">
+            Records Timeline
+          </h3>
+          <div className="h-72">
+            <RecordsOverTimeChart records={records} />
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            {completeness}% complete
-          </p>
-        </div>
-
-        <div className="bg-white dark:bg-slate-900 border border-transparent dark:border-slate-800 rounded-xl shadow-sm p-4">
-          <h2 className="font-semibold text-slate-800 dark:text-slate-100 mb-2 text-sm">
-            Records over time
-          </h2>
-          <RecordsOverTimeChart records={records} />
-        </div>
-      </motion.div>
-
-      {/* Recent records + security info */}
-      <motion.div
-        className="grid md:grid-cols-2 gap-6"
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.15 }}
-      >
-        <div className="bg-white dark:bg-slate-900 border border-transparent dark:border-slate-800 rounded-xl shadow-sm p-4">
-          <h2 className="font-semibold text-slate-800 dark:text-slate-100 mb-2 text-sm">
-            Recent Records
-          </h2>
-          {recentRecords.length === 0 ? (
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              No records yet. Upload one from the Records tab.
-            </p>
-          ) : (
-            <ul className="space-y-2 text-sm">
-              {recentRecords.map((r) => (
-                <li
-                  key={r.id}
-                  className="flex justify-between border-b dark:border-slate-800 last:border-none pb-1"
-                >
-                  <span className="text-slate-700 dark:text-slate-300">{r.title}</span>
-                  <span className="text-xs text-slate-500 dark:text-slate-500">
-                    {new Date(r.createdAt).toLocaleDateString()}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        <div className="bg-white dark:bg-slate-900 border border-transparent dark:border-slate-800 rounded-xl shadow-sm p-4">
-          <h2 className="font-semibold text-slate-800 dark:text-slate-100 mb-2 text-sm">
-            Security &amp; Verification
-          </h2>
-          <p className="text-sm text-slate-600 dark:text-slate-300">
-            Blockchain-verified records:{" "}
-            {records.filter((r) => r.blockchainVerified).length} /{" "}
-            {records.length}
-          </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
-            We use a hybrid model: records are encrypted off-chain, while
-            integrity proofs (hashes) can be anchored on blockchain. This
-            prevents tampering without exposing your raw data.
-          </p>
-        </div>
-      </motion.div>
-    </div>
+        </motion.div>
+      </div>
+    </motion.div>
   );
 }

@@ -32,6 +32,7 @@ interface HealthTrackContextValue {
   family: FamilyMember[];
   addRecord: (input: NewRecordInput) => Promise<void>;
   deleteRecord: (id: string) => Promise<void>;
+  uploadFile: (file: File) => Promise<string>;
   updateEmergencyProfile: (profile: EmergencyProfile) => void;
 }
 
@@ -140,6 +141,25 @@ export const HealthTrackProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // ─────────────────────────────────
+  // Upload file to backend
+  // ─────────────────────────────────
+  const uploadFile = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch("http://localhost:4000/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data?.message || "Upload failed");
+    }
+    return data.fileUrl;
+  };
+
+  // ─────────────────────────────────
   // Delete record via backend
   // ─────────────────────────────────
   const deleteRecord = async (id: string) => {
@@ -180,6 +200,7 @@ export const HealthTrackProvider = ({ children }: { children: ReactNode }) => {
         family,
         addRecord,
         deleteRecord,
+        uploadFile,
         updateEmergencyProfile,
       }}
     >

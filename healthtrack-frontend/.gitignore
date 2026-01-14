@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+# Database files
+healthtrack-backend/data/*.db
+
+# Uploaded files
+healthtrack-backend/uploads/*
