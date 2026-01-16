@@ -1,3 +1,4 @@
+const crypto = require("crypto");
 const EmergencyProfile = require("../models/EmergencyProfile");
 
 // GET /api/emergency/:userId
@@ -14,6 +15,31 @@ const getEmergencyProfile = async (req, res) => {
             });
         }
 
+        return res.json({
+            success: true,
+            data: profile,
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ success: false, message: "Server error" });
+    }
+};
+
+// GET /api/emergency/public/:publicId
+const getPublicProfile = async (req, res) => {
+    const { publicId } = req.params;
+
+    try {
+        const profile = await EmergencyProfile.findOneAsync({ publicId });
+
+        if (!profile) {
+            return res.status(404).json({
+                success: false,
+                message: "Public profile not found",
+            });
+        }
+
+        // Return only critical, non-sensitive data
         return res.json({
             success: true,
             data: {
@@ -37,17 +63,16 @@ const updateEmergencyProfile = async (req, res) => {
     const { userId } = req.params;
     const body = req.body || {};
 
-    if (!body.bloodGroup) {
-        return res
-            .status(400)
-            .json({ success: false, message: "bloodGroup is required" });
-    }
-
     try {
+        // Find existing to keep the publicId if it exists
+        const existing = await EmergencyProfile.findOneAsync({ user: userId });
+        const publicId = existing?.publicId || crypto.randomBytes(6).toString("hex");
+
         const profileData = {
             user: userId,
-            name: body.name || "Unknown User",
-            bloodGroup: body.bloodGroup,
+            publicId,
+            name: body.name || "User",
+            bloodGroup: body.bloodGroup || "Pending",
             allergies: body.allergies || [],
             chronicConditions: body.chronicConditions || [],
             medications: body.medications || [],
@@ -74,5 +99,6 @@ const updateEmergencyProfile = async (req, res) => {
 
 module.exports = {
     getEmergencyProfile,
+    getPublicProfile,
     updateEmergencyProfile,
 };

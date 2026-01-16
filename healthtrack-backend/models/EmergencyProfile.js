@@ -7,4 +7,8 @@ emergencyProfiles.ensureIndex({ fieldName: "user", unique: true }, (err) => {
     if (err) console.error("Index error on emergencyProfiles:", err);
 });
 
+emergencyProfiles.ensureIndex({ fieldName: "publicId", unique: true }, (err) => {
+    if (err) console.error("Index error on emergencyProfiles publicId:", err);
+});
+
 module.exports = emergencyProfiles;

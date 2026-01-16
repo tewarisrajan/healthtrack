@@ -7,8 +7,11 @@ const {
     deleteRecord,
 } = require("../controllers/recordController");
 
+const validate = require("../middleware/validate");
+const { createRecordSchema } = require("../schemas/recordSchema");
+
 router.get("/", getRecords);
-router.post("/", createRecord);
+router.post("/", validate(createRecordSchema), createRecord);
 router.get("/:recordId", getRecordById);
 router.delete("/:recordId", deleteRecord);
 

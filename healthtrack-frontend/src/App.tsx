@@ -13,9 +13,14 @@ import SettingsPage from "./routes/SettingsPage";
 import LoginPage from "./routes/LoginPage";
 import { useAuth } from "./context/AuthContext";
 
+import PublicProfilePage from "./routes/PublicProfilePage";
+
 function App() {
   const { user, loading } = useAuth();
   const location = useLocation();
+
+  // Handle public routes that don't require authentication
+  const isPublicRoute = location.pathname.startsWith("/public/");
 
   // While we check localStorage, show a small loader
   if (loading) {
@@ -26,83 +31,94 @@ function App() {
     );
   }
 
-  // If no user, show login screen (no sidebar/topbar)
-  if (!user) {
+  // If no user and not a public route, show login screen
+  if (!user && !isPublicRoute) {
     return <LoginPage />;
   }
 
-  // Authenticated view
+  // Define the routes separately to reuse for public/private
+  const routeContent = (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<Navigate to="/dashboard" />} />
+        <Route path="/public/emergency/:publicId" element={<PublicProfilePage />} />
+        <Route
+          path="/dashboard"
+          element={
+            <PageTransition>
+              <DashboardPage />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/records"
+          element={
+            <PageTransition>
+              <RecordsPage />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/records/upload"
+          element={
+            <PageTransition>
+              <UploadRecordPage />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/records/:id"
+          element={
+            <PageTransition>
+              <RecordDetailsPage />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/emergency"
+          element={
+            <PageTransition>
+              <EmergencyPage />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/consent"
+          element={
+            <PageTransition>
+              <ConsentPage />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/family"
+          element={
+            <PageTransition>
+              <FamilyPage />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <PageTransition>
+              <SettingsPage />
+            </PageTransition>
+          }
+        />
+      </Routes>
+    </AnimatePresence>
+  );
+
+  // If it's a public route, don't wrap in AppLayout
+  if (isPublicRoute) {
+    return routeContent;
+  }
+
+  // Authenticated view with layout
   return (
     <AppLayout>
-      <AnimatePresence mode="wait">
-        <Routes location={location} key={location.pathname}>
-          <Route path="/" element={<Navigate to="/dashboard" />} />
-          <Route
-            path="/dashboard"
-            element={
-              <PageTransition>
-                <DashboardPage />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/records"
-            element={
-              <PageTransition>
-                <RecordsPage />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/records/upload"
-            element={
-              <PageTransition>
-                <UploadRecordPage />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/records/:id"
-            element={
-              <PageTransition>
-                <RecordDetailsPage />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/emergency"
-            element={
-              <PageTransition>
-                <EmergencyPage />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/consent"
-            element={
-              <PageTransition>
-                <ConsentPage />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/family"
-            element={
-              <PageTransition>
-                <FamilyPage />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/settings"
-            element={
-              <PageTransition>
-                <SettingsPage />
-              </PageTransition>
-            }
-          />
-        </Routes>
-      </AnimatePresence>
+      {routeContent}
     </AppLayout>
   );
 }

@@ -1,32 +1,42 @@
 const express = require("express");
-const path = require("path");
 const multer = require("multer");
+const storageService = require("../utils/storage");
+const { generateHash } = require("../utils/hasher");
 
 const router = express.Router();
 
-// Multer Config
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        // Assuming this is run from the root, but let's be safe relative to cwd
-        cb(null, "uploads/");
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-        cb(null, uniqueSuffix + "-" + file.originalname);
-    },
-});
-const upload = multer({ storage: storage });
+// Multer configured for Memory Storage
+// This allows us to pipe the buffer to our custom StorageService
+const upload = multer({ storage: multer.memoryStorage() });
 
 // POST /api/upload
-router.post("/", upload.single("file"), (req, res) => {
+router.post("/", upload.single("file"), async (req, res) => {
     if (!req.file) {
         return res
             .status(400)
             .json({ success: false, message: "No file uploaded" });
     }
-    // Return URL relative to server root
-    const fileUrl = `/uploads/${req.file.filename}`;
-    return res.json({ success: true, fileUrl });
+
+    try {
+        // Generate cryptographic fingerprint (SHA-256)
+        const fileHash = generateHash(req.file.buffer);
+
+        // Use the adapter service to handle persistence
+        const result = await storageService.uploadFile(req.file);
+
+        return res.json({
+            success: true,
+            fileUrl: result.url,
+            filename: result.filename,
+            fileHash: fileHash
+        });
+    } catch (err) {
+        console.error("Upload Error:", err);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to persist file to storage."
+        });
+    }
 });
 
 module.exports = router;

@@ -12,16 +12,18 @@ export type RecordType =
 export interface HealthRecord {
   id: string;
   title: string;
-  type: RecordType;
+  type: string;
   createdAt: string;          // ISO string
   providerName: string;       // hospital / lab / doctor name
   tags?: string[];
-  fileUrl?: string;           // URL to the file (for now local blob URL)
+  fileUrl?: string | null;    // URL to the file
+  fileHash?: string | null;   // SHA-256 fingerprint
   blockchainVerified?: boolean;
 }
 
 // 🔹 This is the one causing the error if missing
 export interface EmergencyProfile {
+  publicId?: string;
   bloodGroup: string;
   allergies: string[];
   chronicConditions: string[];

@@ -50,6 +50,7 @@ const createRecord = async (req, res) => {
             providerName: body.providerName,
             tags: body.tags || [],
             fileUrl: body.fileUrl || null,
+            fileHash: body.fileHash || null,
             blockchainVerified: !!body.blockchainVerified,
             createdAt: new Date(),
         });
