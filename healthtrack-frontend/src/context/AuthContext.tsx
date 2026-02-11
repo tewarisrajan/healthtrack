@@ -4,13 +4,15 @@ import {
   useContext,
   useEffect,
   useState,
-  ReactNode,
+  type ReactNode,
 } from "react";
 
 interface User {
   id: string;
   name: string;
   email: string;
+  role: "PATIENT" | "DOCTOR" | "PROVIDER";
+  profile?: any;
   abhaId?: string;
 }
 
@@ -25,6 +27,7 @@ interface AuthContextValue {
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  isAuthorized: (requiredRole: string) => boolean;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -53,7 +56,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = async (email: string, password: string) => {
-    // call backend instead of fake login
     const res = await fetch("http://localhost:4000/api/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -66,11 +68,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       throw new Error(data?.message || "Login failed");
     }
 
+    const { user: userData, token: userToken } = data;
+    console.debug("Session Token Secured:", userToken.substring(0, 10) + "...");
+
     const loggedInUser: User = {
-      id: data.user.id,
-      name: data.user.name,
-      email: data.user.email,
-      abhaId: data.user.abhaId,
+      id: userData.id,
+      name: userData.name,
+      email: userData.email,
+      role: userData.role,
+      profile: userData.profile,
+      abhaId: userData.abhaId,
     };
 
     const token = data.token as string;
@@ -88,8 +95,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem(LOCAL_KEY);
   };
 
+  const isAuthorized = (requiredRole: string) => {
+    return user?.role === requiredRole;
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, token, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, token, login, logout, isAuthorized }}>
       {children}
     </AuthContext.Provider>
   );

@@ -7,15 +7,42 @@ const seedData = async () => {
         const userCount = await User.countAsync({});
         if (userCount === 0) {
             console.log("Creating seed data...");
-            // Create user
+            // Create Patient (Demo User)
             const demoUser = await User.insertAsync({
                 name: "Demo User",
                 email: "demo@healthtrack.com",
-                password: "demo123", // Still plain text for demo
+                password: "demo123",
+                role: "PATIENT",
                 abhaId: "12-3456-7890-1234",
             });
 
-            // Create sample record
+            // Create Doctor
+            await User.insertAsync({
+                name: "Dr. Sarah Smith",
+                email: "doctor@healthtrack.com",
+                password: "demo123",
+                role: "DOCTOR",
+                profile: {
+                    specialization: "Cardiologist",
+                    licenseNumber: "MED-99283",
+                    hospital: "General Hospital"
+                }
+            });
+
+            // Create Provider (Hospital Admin)
+            await User.insertAsync({
+                name: "General Hospital",
+                email: "hospital@healthtrack.com",
+                password: "demo123",
+                role: "PROVIDER",
+                profile: {
+                    type: "HOSPITAL",
+                    address: "123 Medical Way, New York",
+                    registerId: "HOSP-NYC-441"
+                }
+            });
+
+            // Create sample record for demo user
             await Record.insertAsync({
                 user: demoUser._id,
                 title: "CBC Lab Report",

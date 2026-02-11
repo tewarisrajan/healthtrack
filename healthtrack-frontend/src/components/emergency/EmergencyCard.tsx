@@ -9,10 +9,17 @@ export default function EmergencyCard() {
   const [bloodGroup, setBloodGroup] = useState(emergencyProfile?.bloodGroup ?? "");
   const [allergies, setAllergies] = useState(emergencyProfile?.allergies.join(", ") ?? "");
   const [conditions, setConditions] = useState(emergencyProfile?.chronicConditions.join(", ") ?? "");
-  const [medications, setMedications] = useState(emergencyProfile?.medications.join(", ") ?? "");
+  const [medications] = useState(emergencyProfile?.medications.join(", ") ?? "");
+  const [visibility, setVisibility] = useState(emergencyProfile?.visibility ?? {
+    bloodGroup: true,
+    allergies: true,
+    chronicConditions: true,
+    medications: true,
+    emergencyContacts: true,
+  });
 
   const [contactName, setContactName] = useState(emergencyProfile?.emergencyContacts[0]?.name ?? "");
-  const [contactRelation, setContactRelation] = useState(emergencyProfile?.emergencyContacts[0]?.relation ?? "");
+  const [contactRelation] = useState(emergencyProfile?.emergencyContacts[0]?.relation ?? "");
   const [contactPhone, setContactPhone] = useState(emergencyProfile?.emergencyContacts[0]?.phone ?? "");
 
   const handleSubmit = async (e: FormEvent) => {
@@ -32,6 +39,7 @@ export default function EmergencyCard() {
           },
         ]
         : [],
+      visibility,
     };
 
     try {
@@ -45,9 +53,30 @@ export default function EmergencyCard() {
     }
   };
 
+  const toggleVisibility = (key: keyof typeof visibility) => {
+    setVisibility(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
   const hasRisks =
     (allergies && allergies.trim().length > 0) ||
     (conditions && conditions.trim().length > 0);
+
+  const VisibilityToggle = ({ label, field }: { label: string, field: keyof typeof visibility }) => (
+    <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-200/50 dark:border-slate-800/50">
+      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{label} Public Visibility</span>
+      <button
+        type="button"
+        onClick={() => toggleVisibility(field)}
+        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${visibility[field] ? 'bg-teal-600' : 'bg-slate-300 dark:bg-slate-700'
+          }`}
+      >
+        <span
+          className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${visibility[field] ? 'translate-x-5' : 'translate-x-1'
+            }`}
+        />
+      </button>
+    </div>
+  );
 
   return (
     <div className="glass-panel p-6 rounded-3xl space-y-6">
@@ -66,7 +95,9 @@ export default function EmergencyCard() {
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Blood Group</label>
+            <div className="flex items-center justify-between px-1">
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Blood Group</label>
+            </div>
             <input
               value={bloodGroup}
               onChange={(e) => setBloodGroup(e.target.value)}
@@ -111,6 +142,20 @@ export default function EmergencyCard() {
               className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-700/50 rounded-2xl px-4 py-3 text-sm focus:outline-none text-slate-800 dark:text-slate-200"
               placeholder="Phone Number"
             />
+          </div>
+        </div>
+
+        {/* Public Visibility Settings */}
+        <div className="pt-4 border-t border-slate-100 dark:border-slate-800/50 space-y-3">
+          <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-widest italic mb-2 px-1">
+            Privacy Control (Public QR)
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <VisibilityToggle label="Blood" field="bloodGroup" />
+            <VisibilityToggle label="Allergies" field="allergies" />
+            <VisibilityToggle label="Chronic" field="chronicConditions" />
+            <VisibilityToggle label="Meds" field="medications" />
+            <VisibilityToggle label="Contacts" field="emergencyContacts" />
           </div>
         </div>
 

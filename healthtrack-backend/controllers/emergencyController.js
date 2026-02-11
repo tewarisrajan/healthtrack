@@ -39,18 +39,29 @@ const getPublicProfile = async (req, res) => {
             });
         }
 
-        // Return only critical, non-sensitive data
+        // Return only critical, non-sensitive data, filtered by visibility
+        const visibility = profile.visibility || {
+            bloodGroup: true,
+            allergies: true,
+            chronicConditions: true,
+            medications: true,
+            emergencyContacts: true
+        };
+
+        const publicData = {
+            name: profile.name,
+            lastUpdated: profile.updatedAt,
+        };
+
+        if (visibility.bloodGroup) publicData.bloodGroup = profile.bloodGroup;
+        if (visibility.allergies) publicData.allergies = profile.allergies;
+        if (visibility.chronicConditions) publicData.chronicConditions = profile.chronicConditions;
+        if (visibility.medications) publicData.medications = profile.medications;
+        if (visibility.emergencyContacts) publicData.emergencyContacts = profile.emergencyContacts;
+
         return res.json({
             success: true,
-            data: {
-                name: profile.name,
-                bloodGroup: profile.bloodGroup,
-                allergies: profile.allergies,
-                chronicConditions: profile.chronicConditions,
-                medications: profile.medications,
-                emergencyContacts: profile.emergencyContacts,
-                lastUpdated: profile.updatedAt,
-            },
+            data: publicData,
         });
     } catch (err) {
         console.error(err);
@@ -77,6 +88,13 @@ const updateEmergencyProfile = async (req, res) => {
             chronicConditions: body.chronicConditions || [],
             medications: body.medications || [],
             emergencyContacts: body.emergencyContacts || [],
+            visibility: body.visibility || {
+                bloodGroup: true,
+                allergies: true,
+                chronicConditions: true,
+                medications: true,
+                emergencyContacts: true,
+            },
             updatedAt: new Date(),
         };
 

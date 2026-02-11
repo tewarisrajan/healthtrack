@@ -33,6 +33,13 @@ export interface EmergencyProfile {
     relation: string;
     phone: string;
   }[];
+  visibility: {
+    bloodGroup: boolean;
+    allergies: boolean;
+    chronicConditions: boolean;
+    medications: boolean;
+    emergencyContacts: boolean;
+  };
 }
 
 // Consent requests from hospitals / doctors / insurers

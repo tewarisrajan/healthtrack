@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
+import { Phone, AlertCircle, Droplets, ShieldAlert, Clock, MapPin, Share2 } from "lucide-react";
 
 interface EmergencyInfo {
     name: string;
-    bloodGroup: string;
-    allergies: string[];
-    chronicConditions: string[];
-    medications: string[];
-    emergencyContacts: { name: string; phone: string; relation: string }[];
+    bloodGroup?: string;
+    allergies?: string[];
+    chronicConditions?: string[];
+    medications?: string[];
+    emergencyContacts?: { name: string; phone: string; relation: string }[];
     lastUpdated: string;
 }
 
@@ -37,10 +38,36 @@ export default function PublicProfilePage() {
         fetchInfo();
     }, [publicId]);
 
+    const shareLocation = () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    const mapUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+                    if (navigator.share) {
+                        navigator.share({
+                            title: 'Emergency Location',
+                            text: `I am at this location: ${mapUrl}`,
+                            url: mapUrl
+                        }).catch(console.error);
+                    } else {
+                        window.open(mapUrl, '_blank');
+                    }
+                },
+                () => {
+                    alert("Location access denied.");
+                }
+            );
+        }
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-red-600 flex items-center justify-center p-6">
-                <div className="text-white font-bold text-xl animate-pulse">LOADING CRITICAL DATA...</div>
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-16 h-16 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <div className="text-white font-black text-2xl uppercase tracking-tighter italic animate-pulse">Retrieving Medical Data...</div>
+                </div>
             </div>
         );
     }
@@ -48,154 +75,198 @@ export default function PublicProfilePage() {
     if (error || !info) {
         return (
             <div className="min-h-screen bg-slate-900 flex items-center justify-center p-6 text-center">
-                <div className="max-w-md space-y-4">
-                    <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-red-500/20">
-                        <svg className="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                <div className="max-w-md space-y-6">
+                    <div className="w-24 h-24 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-red-500/20 shadow-2xl shadow-red-500/10">
+                        <AlertCircle className="w-12 h-12 text-red-500" />
                     </div>
-                    <h1 className="text-2xl font-bold text-white">Profile Not Found</h1>
-                    <p className="text-slate-400">The emergency profile you are looking for does not exist or has been disabled.</p>
+                    <div>
+                        <h1 className="text-3xl font-black text-white uppercase tracking-tight">Record Restricted</h1>
+                        <p className="text-slate-400 mt-2 leading-relaxed">This emergency profile is either inactive or the link has expired. Please verify with the patient's ID card.</p>
+                    </div>
+                    <button onClick={() => window.location.reload()} className="px-8 py-3 bg-slate-800 text-white rounded-2xl font-bold hover:bg-slate-700 transition-all border border-slate-700">
+                        Try Again
+                    </button>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-white dark:bg-slate-950 font-sans">
-            {/* High Visibility Header */}
-            <div className="bg-red-600 p-6 text-white sticky top-0 z-50 shadow-xl border-b-4 border-red-700">
+        <div className="min-h-screen bg-white dark:bg-slate-950 font-sans selection:bg-red-500 selection:text-white">
+            {/* Critical Status Header */}
+            <div className="bg-red-600 p-6 text-white sticky top-0 z-50 shadow-[0_10px_40px_rgba(220,38,38,0.3)] border-b-4 border-red-700">
                 <div className="max-w-2xl mx-auto flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-red-600 shadow-inner">
-                            <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 11h-4v4h-4v-4H6v-4h4V6h4v4h4v4z" /></svg>
+                        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-red-600 shadow-[inset_0_2px_10px_rgba(0,0,0,0.1)]">
+                            <ShieldAlert className="w-10 h-10" fill="currentColor" strokeWidth={0} />
                         </div>
                         <div>
-                            <h1 className="text-2xl font-black uppercase tracking-tighter leading-none italic">Medical Alert</h1>
-                            <p className="text-red-100 text-xs font-bold uppercase tracking-widest mt-1 opacity-80">Official HealthTrack Emergency Profile</p>
+                            <h1 className="text-3xl font-black uppercase tracking-tighter leading-none italic mb-1">Medical Alert</h1>
+                            <div className="flex items-center gap-2 text-red-100/80 text-[10px] font-bold uppercase tracking-widest leading-none">
+                                <span className="w-2 h-2 rounded-full bg-white animate-ping"></span>
+                                Live Response Access
+                            </div>
                         </div>
                     </div>
                     <div className="flex flex-col items-end">
-                        <div className="text-4xl font-black">{info.bloodGroup}</div>
-                        <div className="text-[10px] font-bold uppercase opacity-80">Blood Group</div>
+                        <div className="text-5xl font-black tracking-tighter leading-none">{info.bloodGroup || "??"}</div>
+                        <div className="text-[10px] font-black uppercase tracking-widest opacity-80 mt-1">Blood Group</div>
                     </div>
                 </div>
             </div>
 
-            <div className="max-w-2xl mx-auto p-6 space-y-6">
-                {/* Name Card */}
+            <div className="max-w-2xl mx-auto p-6 space-y-8">
+                {/* Identity Block */}
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-3xl border border-slate-200 dark:border-slate-800"
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="relative overflow-hidden bg-slate-50 dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none"
                 >
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1 block">Patient Name</label>
-                    <div className="text-3xl font-bold text-slate-900 dark:text-white">{info.name}</div>
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/5 rounded-full -mr-16 -mt-16 blur-3xl"></div>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 block">Patient Identification</label>
+                    <div className="text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">{info.name}</div>
                 </motion.div>
 
-                {/* Critical Alerts - High Contrast */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Critical Information Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Allergies Card */}
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="p-6 rounded-3xl bg-amber-500/10 border-2 border-amber-500/30"
+                        className={`p-6 rounded-[2rem] border-2 transition-all ${info.allergies?.length ? 'bg-red-50 border-red-200 dark:bg-red-500/10 dark:border-red-500/20' : 'bg-slate-50 border-slate-100 dark:bg-slate-900 dark:border-slate-800 opacity-60'}`}
                     >
-                        <div className="flex items-center gap-2 mb-4">
-                            <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center text-white">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${info.allergies?.length ? 'bg-red-600 text-white' : 'bg-slate-400 text-white'}`}>
+                                <AlertCircle className="w-6 h-6" />
                             </div>
-                            <h2 className="font-bold text-amber-600 dark:text-amber-500 uppercase tracking-tight">Allergies</h2>
+                            <h2 className={`font-black uppercase tracking-tight text-lg ${info.allergies?.length ? 'text-red-700 dark:text-red-400' : 'text-slate-500 dark:text-slate-400'}`}>Allergies</h2>
                         </div>
-                        {info.allergies.length > 0 ? (
+                        {info.allergies && info.allergies.length > 0 ? (
                             <div className="flex flex-wrap gap-2">
                                 {info.allergies.map((a, i) => (
-                                    <span key={i} className="px-3 py-1.5 bg-amber-500 text-white rounded-xl text-sm font-bold shadow-sm">{a}</span>
+                                    <span key={i} className="px-4 py-2 bg-red-600 text-white rounded-2xl text-sm font-black shadow-lg shadow-red-600/20 ring-4 ring-white dark:ring-slate-900">{a}</span>
                                 ))}
                             </div>
                         ) : (
-                            <span className="text-slate-400 font-medium italic">No known allergies reported.</span>
+                            <span className="text-slate-400 font-bold italic text-sm">No known record.</span>
                         )}
                     </motion.div>
 
+                    {/* Conditions Card */}
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="p-6 rounded-3xl bg-indigo-500/10 border-2 border-indigo-500/30"
+                        className={`p-6 rounded-[2rem] border-2 transition-all ${info.chronicConditions?.length ? 'bg-amber-50 border-amber-200 dark:bg-amber-500/10 dark:border-amber-500/20' : 'bg-slate-50 border-slate-100 dark:bg-slate-900 dark:border-slate-800 opacity-60'}`}
                     >
-                        <div className="flex items-center gap-2 mb-4">
-                            <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center text-white">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a2 2 0 00-1.96 1.414l-.727 2.903a2 2 0 01-1.127 1.314l-2.904.727a2 2 0 01-1.414-1.96l.477-2.387a2 2 0 00-.547-1.022L4.572 11.572a2 2 0 00-.547 1.022l-.477 2.387a2 2 0 001.96 1.414l2.903.727a2 2 0 001.314-1.127l.727-2.904a2 2 0 00-1.96-1.414l-2.387-.477a2 2 0 00-1.022.547l-3.428 3.428z" /></svg>
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${info.chronicConditions?.length ? 'bg-amber-500 text-white' : 'bg-slate-400 text-white'}`}>
+                                <Clock className="w-6 h-6" />
                             </div>
-                            <h2 className="font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-tight">Chronic Conditions</h2>
+                            <h2 className={`font-black uppercase tracking-tight text-lg ${info.chronicConditions?.length ? 'text-amber-700 dark:text-amber-500' : 'text-slate-500 dark:text-slate-400'}`}>Chronic</h2>
                         </div>
-                        {info.chronicConditions.length > 0 ? (
+                        {info.chronicConditions && info.chronicConditions.length > 0 ? (
                             <div className="flex flex-wrap gap-2">
                                 {info.chronicConditions.map((c, i) => (
-                                    <span key={i} className="px-3 py-1.5 bg-indigo-500 text-white rounded-xl text-sm font-bold shadow-sm">{c}</span>
+                                    <span key={i} className="px-4 py-2 bg-amber-500 text-white rounded-2xl text-sm font-black shadow-lg shadow-amber-500/20 ring-4 ring-white dark:ring-slate-900">{c}</span>
                                 ))}
                             </div>
                         ) : (
-                            <span className="text-slate-400 font-medium italic">No chronic conditions listed.</span>
+                            <span className="text-slate-400 font-bold italic text-sm">No known record.</span>
                         )}
                     </motion.div>
                 </div>
 
-                {/* Medications */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-3xl border border-slate-200 dark:border-slate-800"
-                >
-                    <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-teal-500"></div>
-                        ACTIVE MEDICATIONS
-                    </h2>
-                    {info.medications.length > 0 ? (
-                        <ul className="space-y-3">
+                {/* Medications List */}
+                {info.medications && info.medications.length > 0 && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
+                        className="bg-slate-50 dark:bg-slate-900/50 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-sm"
+                    >
+                        <h2 className="text-[10px] font-black text-slate-400 dark:text-slate-500 mb-6 flex items-center gap-3 tracking-[0.2em] uppercase">
+                            <Droplets className="w-4 h-4 text-teal-500" />
+                            Active Medications
+                        </h2>
+                        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             {info.medications.map((m, i) => (
-                                <li key={i} className="flex items-center gap-3 p-3 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/50">
-                                    <div className="w-2 h-2 rounded-full bg-teal-500/30"></div>
-                                    <span className="text-slate-700 dark:text-slate-300 font-bold">{m}</span>
+                                <li key={i} className="flex items-center gap-4 p-4 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/50">
+                                    <div className="w-2.5 h-2.5 rounded-full bg-teal-500 ring-4 ring-teal-500/10"></div>
+                                    <span className="text-slate-800 dark:text-slate-200 font-black text-lg">{m}</span>
                                 </li>
                             ))}
                         </ul>
-                    ) : (
-                        <p className="text-slate-400 italic text-sm">No medications listed.</p>
-                    )}
-                </motion.div>
+                    </motion.div>
+                )}
 
-                {/* Emergency Contacts */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                    className="space-y-4"
-                >
-                    <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest pl-1">Primary Contacts</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {info.emergencyContacts.map((contact, i) => (
-                            <div key={i} className="p-4 bg-teal-500/5 dark:bg-teal-500/10 rounded-3xl border border-teal-500/20">
-                                <div className="flex items-start justify-between mb-2">
-                                    <div className="text-lg font-bold text-slate-900 dark:text-white leading-tight">{contact.name}</div>
-                                    <span className="text-[10px] font-bold uppercase bg-teal-500/20 text-teal-600 dark:text-teal-400 px-2 py-0.5 rounded-full">{contact.relation}</span>
-                                </div>
-                                <a href={`tel:${contact.phone}`} className="flex items-center gap-2 text-teal-600 dark:text-teal-400 font-bold text-lg hover:underline decoration-2 underline-offset-4">
-                                    <svg className="w-5 h-5 font-bold" fill="currentColor" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" /></svg>
-                                    {contact.phone}
+                {/* Emergency Hotlines / Contacts */}
+                {info.emergencyContacts && info.emergencyContacts.length > 0 && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.4 }}
+                        className="space-y-4"
+                    >
+                        <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] pl-2">Emergency Contacts</h2>
+                        <div className="grid grid-cols-1 gap-3">
+                            {info.emergencyContacts.map((contact, i) => (
+                                <a
+                                    key={i}
+                                    href={`tel:${contact.phone}`}
+                                    className="group relative overflow-hidden p-6 bg-teal-600 rounded-[2rem] flex items-center justify-between shadow-xl shadow-teal-600/20 hover:bg-teal-700 transition-all active:scale-[0.98]"
+                                >
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-white/10 transition-colors"></div>
+                                    <div className="relative">
+                                        <div className="text-[10px] font-black text-teal-100/60 uppercase tracking-widest mb-1">{contact.relation}</div>
+                                        <div className="text-2xl font-black text-white">{contact.name}</div>
+                                        <div className="text-teal-100/90 font-mono font-bold mt-1 tracking-wider">{contact.phone}</div>
+                                    </div>
+                                    <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-white ring-4 ring-white/10 group-hover:scale-110 transition-transform">
+                                        <Phone className="w-8 h-8" fill="currentColor" strokeWidth={0} />
+                                    </div>
                                 </a>
-                            </div>
-                        ))}
-                    </div>
-                </motion.div>
+                            ))}
+                        </div>
+                    </motion.div>
+                )}
 
-                {/* Footer info */}
-                <div className="pt-8 pb-12 text-center space-y-2">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                        Last Verified: {new Date(info.lastUpdated).toLocaleString()}
+                {/* Action Toolbar */}
+                <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                    <button
+                        onClick={shareLocation}
+                        className="flex-1 flex items-center justify-center gap-3 p-5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-3xl font-black uppercase tracking-tight hover:opacity-90 transition-all active:scale-95"
+                    >
+                        <MapPin className="w-6 h-6" />
+                        Share Current Location
+                    </button>
+                    <button
+                        onClick={() => {
+                            if (navigator.share) {
+                                navigator.share({
+                                    title: `${info.name}'s Medical Profile`,
+                                    url: window.location.href
+                                });
+                            }
+                        }}
+                        className="p-5 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded-3xl font-black hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-95 border border-slate-200 dark:border-slate-700"
+                    >
+                        <Share2 className="w-6 h-6" />
+                    </button>
+                </div>
+
+                {/* Secure Footer */}
+                <div className="pt-12 pb-16 text-center space-y-4 px-4 border-t border-slate-100 dark:border-slate-900">
+                    <div className="flex items-center justify-center gap-2 text-slate-400">
+                        < ShieldAlert className="w-4 h-4" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em]">Verified Secure Data</span>
+                    </div>
+                    <p className="text-[10px] font-black text-slate-400/80 uppercase tracking-widest leading-relaxed">
+                        Last System Verification: <span className="text-slate-600 dark:text-slate-400">{new Date(info.lastUpdated).toLocaleString()}</span>
                     </p>
-                    <p className="text-[10px] text-slate-400 max-w-sm mx-auto">
-                        This information is provided for emergency medical use only. Use extreme caution before administering treatment.
+                    <p className="text-[9px] text-slate-400/60 font-medium max-w-sm mx-auto leading-relaxed">
+                        INTENDED FOR EMERGENCY RESPONDERS ONLY. IMPROPER USE MAY CARRY LEGAL CONSEQUENCES.
                     </p>
                 </div>
             </div>

@@ -1,3 +1,5 @@
-{"name":"Demo User","email":"demo@healthtrack.com","password":"demo123","abhaId":"12-3456-7890-1234","_id":"ujBYkQmhDoEpugsB"}
 {"$$indexCreated":{"fieldName":"email","unique":true,"sparse":false}}
 {"$$indexCreated":{"fieldName":"email","unique":true}}
+{"name":"Demo User","email":"demo@healthtrack.com","password":"demo123","role":"PATIENT","abhaId":"12-3456-7890-1234","_id":"DSHaidCF8JuKb5QF"}
+{"name":"Dr. Sarah Smith","email":"doctor@healthtrack.com","password":"demo123","role":"DOCTOR","profile":{"specialization":"Cardiologist","licenseNumber":"MED-99283","hospital":"General Hospital"},"_id":"8DRh5PEHcI9UUZaN"}
+{"name":"General Hospital","email":"hospital@healthtrack.com","password":"demo123","role":"PROVIDER","profile":{"type":"HOSPITAL","address":"123 Medical Way, New York","registerId":"HOSP-NYC-441"},"_id":"2OeQbHSr0w054sWu"}

@@ -1,4 +1,6 @@
+const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const { JWT_SECRET } = require("../middleware/authMiddleware");
 
 // POST /api/login
 const login = async (req, res) => {
@@ -19,16 +21,20 @@ const login = async (req, res) => {
                 .json({ success: false, message: "Invalid credentials" });
         }
 
-        // Demo token
-        const fakeToken = "demo-token-" + user._id;
+        // Generate actual JWT
+        const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, {
+            expiresIn: "30d",
+        });
 
         return res.json({
             success: true,
-            token: fakeToken,
+            token: token,
             user: {
                 id: user._id,
                 name: user.name,
                 email: user.email,
+                role: user.role || "PATIENT",
+                profile: user.profile || {},
                 abhaId: user.abhaId,
             },
         });

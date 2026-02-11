@@ -1,13 +1,34 @@
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
-const navItems = [
-  { to: "/dashboard", label: "Overview", icon: "📊" },
-  { to: "/records", label: "My Records", icon: "📂" },
-  { to: "/emergency", label: "Emergency", icon: "🚨" },
-  { to: "/family", label: "Family", icon: "👨‍👩‍👧" },
-  { to: "/settings", label: "Settings", icon: "⚙️" },
-];
+const getNavItems = (role?: string) => {
+  const common = [
+    { to: "/dashboard", label: "Overview", icon: "📊" },
+  ];
+
+  if (role === "DOCTOR") {
+    return [
+      ...common,
+      { to: "/consultations", label: "Consultations", icon: "🩺" },
+      { to: "/patients", label: "Patients", icon: "👥" },
+    ];
+  }
+
+  if (role === "PROVIDER") {
+    return [
+      ...common,
+      { to: "/management", label: "Facility Mgmt", icon: "🏢" },
+      { to: "/staff", label: "Staff", icon: "👨‍⚕️" },
+    ];
+  }
+
+  return [
+    ...common,
+    { to: "/records", label: "My Records", icon: "📂" },
+    { to: "/emergency", label: "Emergency", icon: "🚨" },
+    { to: "/family", label: "Family", icon: "👨‍👩‍👧" },
+  ];
+};
 
 export default function Sidebar() {
   const { user } = useAuth();
@@ -37,7 +58,7 @@ export default function Sidebar() {
       </div>
 
       <nav className="flex-1 overflow-y-auto px-4 py-2 space-y-1">
-        {navItems.map((item) => (
+        {getNavItems(user?.role).map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
