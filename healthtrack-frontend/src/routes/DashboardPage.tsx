@@ -1,14 +1,31 @@
-import { useAuth } from "../context/AuthContext";
+import { useEffect } from "react";
 import { useHealthTrack } from "../context/HealthTrackContext";
 import Card from "../components/ui/Card";
 import RecordsOverTimeChart from "../components/dashboard/RecordsOverTimeChart";
 import HealthScoreWidget from "../components/dashboard/HealthScoreWidget";
 import QuickActions from "../components/dashboard/QuickActions";
+import ConsentRequestList from "../components/consent/ConsentRequestList";
 import { motion } from "framer-motion";
 
 export default function DashboardPage() {
-  const { user } = useAuth();
-  const { records } = useHealthTrack();
+  const { records, consentRequests, fetchConsents, respondToConsent } = useHealthTrack();
+
+  // Poll for consents
+  useEffect(() => {
+    fetchConsents?.(); // Initial fetch
+    const interval = setInterval(() => {
+      fetchConsents?.();
+    }, 5000); // 5s poll for dashboard
+    return () => clearInterval(interval);
+  }, [fetchConsents]);
+
+  const handleConsentResponse = async (id: string, status: "APPROVED" | "REJECTED") => {
+    try {
+      await respondToConsent(id, status);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   // Calculate dynamic stats
   const totalRecords = records.length;
@@ -21,8 +38,8 @@ export default function DashboardPage() {
     show: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.05, // Faster stagger
-        delayChildren: 0.1,    // Shorter initial delay
+        staggerChildren: 0.05,
+        delayChildren: 0.1,
       }
     }
   };
@@ -49,6 +66,24 @@ export default function DashboardPage() {
           </p>
         </div>
       </div>
+
+      {/* Real-time Consent Requests Widget */}
+      {consentRequests.length > 0 && (
+        <motion.div variants={item} className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-teal-100 dark:border-teal-900 shadow-lg shadow-teal-900/5">
+          <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2">
+            <span className="relative flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-teal-500"></span>
+            </span>
+            Pending Access Requests
+          </h2>
+          <ConsentRequestList
+            requests={consentRequests}
+            onApprove={(id) => handleConsentResponse(id, 'APPROVED')}
+            onReject={(id) => handleConsentResponse(id, 'REJECTED')}
+          />
+        </motion.div>
+      )}
 
       {/* Bento Grid Layout */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">

@@ -1,14 +1,23 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { useHealthTrack } from '../context/HealthTrackContext';
 import ConsentRequestList from '../components/consent/ConsentRequestList';
-import type { ConsentRequest } from '../types/models';
 
 export default function ConsentPage() {
-  const { consentRequests } = useHealthTrack();
-  const [requests, setRequests] = useState<ConsentRequest[]>(consentRequests);
+  const { consentRequests, respondToConsent, fetchConsents } = useHealthTrack();
 
-  const updateStatus = (id: string, status: ConsentRequest['status']) => {
-    setRequests(prev => prev.map(r => (r.id === id ? { ...r, status } : r)));
+  useEffect(() => {
+    // Poll for new requests every 10 seconds
+    const interval = setInterval(() => {
+      fetchConsents?.();
+    }, 10000);
+    return () => clearInterval(interval);
+
+    try {
+      await respondToConsent(id, status);
+    } catch (err) {
+      console.error(err);
+      // toast or alert would go here
+    }
   };
 
   return (
@@ -18,9 +27,9 @@ export default function ConsentPage() {
         You are always in control. Approve or reject requests to access your health records from hospitals, doctors, or insurers.
       </p>
       <ConsentRequestList
-        requests={requests}
-        onApprove={id => updateStatus(id, 'APPROVED')}
-        onReject={id => updateStatus(id, 'REJECTED')}
+        requests={consentRequests}
+        onApprove={id => handleUpdate(id, 'APPROVED')}
+        onReject={id => handleUpdate(id, 'REJECTED')}
       />
     </div>
   );

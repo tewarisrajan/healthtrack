@@ -35,6 +35,12 @@ app.use("/api/upload", uploadRoutes);
 app.use("/api/audit", auditRoutes);
 app.use("/api/health", healthRoutes);
 
+// New Modules
+const doctorRoutes = require("./routes/doctorRoutes");
+const consentRoutes = require("./routes/consentRoutes");
+app.use("/api/doctor", doctorRoutes);
+app.use("/api/consent", consentRoutes);
+
 // 404 Catch-all
 app.use((req, res, next) => {
   const error = new Error(`Not Found - ${req.originalUrl}`);

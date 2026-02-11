@@ -17,10 +17,10 @@ export default function ConsentRequestList({ requests, onApprove, onReject }: Pr
         <div key={req.id} className="p-3 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
           <div>
             <p className="text-sm font-medium text-slate-800">
-              {req.requesterName} ({req.requesterType.toLowerCase()})
+              Dr. {req.doctorName}
             </p>
             <p className="text-xs text-slate-500">
-              Purpose: {req.purpose} • Records: {req.requestedRecords.replace('_', ' ').toLowerCase()}
+              Requesting access to your health records
             </p>
           </div>
           {req.status === 'PENDING' ? (

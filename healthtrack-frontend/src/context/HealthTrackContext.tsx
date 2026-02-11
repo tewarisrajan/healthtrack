@@ -4,6 +4,7 @@ import {
   useContext,
   useState,
   useEffect,
+  useCallback,
   type ReactNode,
 } from "react";
 import type {
@@ -39,6 +40,8 @@ interface HealthTrackContextValue {
   toggleFamilyEmergency: (id: string) => Promise<void>;
   logRecordAccess: (recordId: string, action?: string) => Promise<void>;
   fetchAuditLogs: (recordId: string) => Promise<any[]>;
+  respondToConsent: (requestId: string, status: "APPROVED" | "REJECTED") => Promise<void>;
+  fetchConsents: () => Promise<void>;
 }
 
 const HealthTrackContext = createContext<
@@ -54,19 +57,26 @@ export const HealthTrackProvider = ({ children }: { children: ReactNode }) => {
   const [emergencyProfile, setEmergencyProfile] =
     useState<EmergencyProfile | null>(null);
 
-  const [consentRequests] = useState<ConsentRequest[]>([
-    {
-      id: "c1",
-      requesterType: "HOSPITAL",
-      requesterName: "City Care Hospital",
-      purpose: "Pre-surgery evaluation",
-      requestedRecords: "LAST_6_MONTHS",
-      createdAt: new Date().toISOString(),
-      status: "PENDING",
-    },
-  ]);
+  const [consentRequests, setConsentRequests] = useState<ConsentRequest[]>([]);
 
   const [family, setFamily] = useState<FamilyMember[]>([]);
+
+  const fetchConsents = useCallback(async () => {
+    // Only PATIENTs have consents to manage
+    if (!user || user.role !== 'PATIENT') return;
+
+    try {
+      const res = await fetch("http://localhost:4000/api/consent/pending", {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setConsentRequests(data.data || []);
+      }
+    } catch (err) {
+      console.error("Error loading consents", err);
+    }
+  }, [user, token]);
 
   // ─────────────────────────────────
   // Load records and family from backend when user changes
@@ -75,6 +85,7 @@ export const HealthTrackProvider = ({ children }: { children: ReactNode }) => {
     if (!user) {
       setRecords([]);
       setFamily([]);
+      setConsentRequests([]);
       return;
     }
 
@@ -141,7 +152,8 @@ export const HealthTrackProvider = ({ children }: { children: ReactNode }) => {
     fetchRecords();
     fetchFamily();
     fetchEmergency();
-  }, [user, token]);
+    fetchConsents();
+  }, [user, token, fetchConsents]);
 
   // ─────────────────────────────────
   // Add record via backend
@@ -288,6 +300,24 @@ export const HealthTrackProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const respondToConsent = async (requestId: string, status: "APPROVED" | "REJECTED") => {
+    if (!user) return;
+    const res = await fetch(`http://localhost:4000/api/consent/${requestId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({ status })
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data?.message || "Failed to update consent");
+
+    // Remove from local list if processed
+    setConsentRequests(prev => prev.filter(r => r.id !== requestId));
+  };
+
   return (
     <HealthTrackContext.Provider
       value={{
@@ -304,6 +334,8 @@ export const HealthTrackProvider = ({ children }: { children: ReactNode }) => {
         toggleFamilyEmergency,
         logRecordAccess,
         fetchAuditLogs,
+        respondToConsent,
+        fetchConsents
       }}
     >
       {children}

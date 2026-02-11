@@ -1,0 +1,6 @@
+{"doctorId":"8DRh5PEHcI9UUZaN","patientId":"DSHaidCF8JuKb5QF","status":"PENDING","createdAt":{"$$date":1770823570827},"updatedAt":{"$$date":1770823570827},"_id":"T4MIhwqW1UUexrvv"}
+{"$$indexCreated":{"fieldName":"doctorId","unique":false,"sparse":false}}
+{"$$indexCreated":{"fieldName":"patientId","unique":false,"sparse":false}}
+{"$$indexCreated":{"fieldName":"doctorId"}}
+{"$$indexCreated":{"fieldName":"patientId"}}
+{"doctorId":"8DRh5PEHcI9UUZaN","patientId":"DSHaidCF8JuKb5QF","status":"APPROVED","createdAt":{"$$date":1770823570827},"updatedAt":{"$$date":1770825516088},"_id":"T4MIhwqW1UUexrvv"}

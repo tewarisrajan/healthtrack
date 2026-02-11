@@ -14,6 +14,7 @@ import { useAuth } from "./context/AuthContext";
 import PublicProfilePage from "./routes/PublicProfilePage";
 import DashboardSwitcher from "./routes/DashboardSwitcher";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import DoctorPatientView from "./routes/DoctorPatientView";
 
 function App() {
   const { user, loading } = useAuth();
@@ -123,8 +124,18 @@ function App() {
             </ProtectedRoute>
           }
         />
-        {/* Placeholder Doctor Routes */}
+        {/* Doctor Routes */}
         <Route path="/consultations" element={<ProtectedRoute role="DOCTOR"><div>Consultations View</div></ProtectedRoute>} />
+        <Route
+          path="/doctor/patients/:patientId"
+          element={
+            <ProtectedRoute role="DOCTOR">
+              <PageTransition>
+                <DoctorPatientView />
+              </PageTransition>
+            </ProtectedRoute>
+          }
+        />
         <Route path="/patients" element={<ProtectedRoute role="DOCTOR"><div>Patient Search View</div></ProtectedRoute>} />
         {/* Placeholder Provider Routes */}
         <Route path="/management" element={<ProtectedRoute role="PROVIDER"><div>Facility Management</div></ProtectedRoute>} />

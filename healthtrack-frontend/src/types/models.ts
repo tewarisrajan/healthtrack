@@ -43,14 +43,14 @@ export interface EmergencyProfile {
 }
 
 // Consent requests from hospitals / doctors / insurers
+// Consent requests to accessing patient records
 export interface ConsentRequest {
   id: string;
-  requesterType: "DOCTOR" | "HOSPITAL" | "INSURER";
-  requesterName: string;
-  purpose: string;
-  requestedRecords: "ALL" | "LAST_6_MONTHS" | "SPECIFIC";
+  doctorId: string;
+  doctorName: string;
+  status: "PENDING" | "APPROVED" | "REJECTED";
   createdAt: string;
-  status: "PENDING" | "APPROVED" | "REJECTED" | "EXPIRED";
+  updatedAt?: string;
 }
 
 // Family members managed in the app
