@@ -23,6 +23,7 @@ interface NewRecordInput {
   tags?: string[];
   fileUrl?: string | null;
   fileHash?: string | null;
+  extractedText?: string | null;
   blockchainVerified?: boolean;
 }
 
@@ -182,7 +183,7 @@ export const HealthTrackProvider = ({ children }: { children: ReactNode }) => {
   // ─────────────────────────────────
   // Upload file to backend
   // ─────────────────────────────────
-  const uploadFile = async (file: File): Promise<{ fileUrl: string; fileHash: string }> => {
+  const uploadFile = async (file: File): Promise<{ fileUrl: string; fileHash: string; extractedText?: string }> => {
     const formData = new FormData();
     formData.append("file", file);
 
@@ -195,7 +196,8 @@ export const HealthTrackProvider = ({ children }: { children: ReactNode }) => {
     if (!res.ok || !data.success) throw new Error(data?.message || "Upload failed");
     return {
       fileUrl: data.fileUrl,
-      fileHash: data.fileHash
+      fileHash: data.fileHash,
+      extractedText: data.extractedText
     };
   };
 

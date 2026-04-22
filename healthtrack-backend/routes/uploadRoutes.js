@@ -2,6 +2,7 @@ const express = require("express");
 const multer = require("multer");
 const storageService = require("../utils/storage");
 const { generateHash } = require("../utils/hasher");
+const { extractTextFromBuffer } = require("../utils/ocrService");
 
 const router = express.Router();
 
@@ -21,14 +22,20 @@ router.post("/", upload.single("file"), async (req, res) => {
         // Generate cryptographic fingerprint (SHA-256)
         const fileHash = generateHash(req.file.buffer);
 
+        // Run Smart Document Parsing (OCR) asynchronously while uploading
+        const ocrPromise = extractTextFromBuffer(req.file.buffer, req.file.mimetype);
+
         // Use the adapter service to handle persistence
-        const result = await storageService.uploadFile(req.file);
+        const uploadPromise = storageService.uploadFile(req.file);
+
+        const [extractedText, result] = await Promise.all([ocrPromise, uploadPromise]);
 
         return res.json({
             success: true,
             fileUrl: result.url,
             filename: result.filename,
-            fileHash: fileHash
+            fileHash: fileHash,
+            extractedText: extractedText
         });
     } catch (err) {
         console.error("Upload Error:", err);

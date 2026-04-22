@@ -19,6 +19,7 @@ export interface HealthRecord {
   tags?: string[];
   fileUrl?: string | null;    // URL to the file
   fileHash?: string | null;   // SHA-256 fingerprint
+  extractedText?: string | null; // Parsed text from OCR/PDF
   blockchainVerified?: boolean;
 }
 

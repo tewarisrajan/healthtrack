@@ -40,13 +40,14 @@ export default function UploadRecordPage() {
     setScanning(false);
 
     try {
-      const { fileUrl, fileHash } = await uploadFile(file);
+      const { fileUrl, fileHash, extractedText } = await uploadFile(file);
       await addRecord({
         title,
         type,
         providerName,
         fileUrl,
         fileHash,
+        extractedText,
         blockchainVerified: false,
       });
 

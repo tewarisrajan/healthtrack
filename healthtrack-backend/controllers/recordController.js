@@ -51,6 +51,7 @@ const createRecord = async (req, res) => {
             tags: body.tags || [],
             fileUrl: body.fileUrl || null,
             fileHash: body.fileHash || null,
+            extractedText: body.extractedText || null,
             blockchainVerified: !!body.blockchainVerified,
             createdAt: new Date(),
         });
