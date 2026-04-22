@@ -12,6 +12,7 @@ const uploadRoutes = require("./routes/uploadRoutes");
 const familyRoutes = require("./routes/familyRoutes");
 const auditRoutes = require("./routes/auditRoutes");
 const healthRoutes = require("./routes/healthRoutes");
+const aiRoutes = require("./routes/aiRoutes");
 const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
@@ -34,6 +35,7 @@ app.get("/api/public/emergency/:publicId", getPublicProfile);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/audit", auditRoutes);
 app.use("/api/health", healthRoutes);
+app.use("/api/ai", aiRoutes);
 
 // New Modules
 const doctorRoutes = require("./routes/doctorRoutes");

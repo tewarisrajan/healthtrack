@@ -5,6 +5,7 @@ import RecordsOverTimeChart from "../components/dashboard/RecordsOverTimeChart";
 import HealthScoreWidget from "../components/dashboard/HealthScoreWidget";
 import QuickActions from "../components/dashboard/QuickActions";
 import ConsentRequestList from "../components/consent/ConsentRequestList";
+import SymptomCheckerWidget from "../components/dashboard/SymptomCheckerWidget";
 import { motion } from "framer-motion";
 
 export default function DashboardPage() {
@@ -122,6 +123,9 @@ export default function DashboardPage() {
           </div>
         </motion.div>
       </div>
+
+      {/* Floating AI Symptom Checker */}
+      <SymptomCheckerWidget />
     </motion.div>
   );
 }
