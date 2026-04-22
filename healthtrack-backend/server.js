@@ -58,6 +58,10 @@ app.get("/", (req, res) => {
   res.send("HealthTrack backend is running with NeDB (Modular Structure)");
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, (err) => {
+  if (err) {
+    console.error(`❌ Failed to start server:`, err.message || err);
+    process.exit(1);
+  }
   console.log(`✅ HealthTrack backend running at http://localhost:${PORT}`);
 });
