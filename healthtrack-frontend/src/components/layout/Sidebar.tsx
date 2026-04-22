@@ -25,6 +25,7 @@ const getNavItems = (role?: string) => {
   return [
     ...common,
     { to: "/records", label: "My Records", icon: "📂" },
+    { to: "/triage", label: "AI Triage", icon: "🤖" },
     { to: "/emergency", label: "Emergency", icon: "🚨" },
     { to: "/family", label: "Family", icon: "👨‍👩‍👧" },
   ];

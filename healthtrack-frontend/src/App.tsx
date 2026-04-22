@@ -13,6 +13,7 @@ import LoginPage from "./routes/LoginPage";
 import RegisterPage from "./routes/RegisterPage";
 import { useAuth } from "./context/AuthContext";
 import PublicProfilePage from "./routes/PublicProfilePage";
+import TriagePage from "./routes/TriagePage";
 import DashboardSwitcher from "./routes/DashboardSwitcher";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import DoctorPatientView from "./routes/DoctorPatientView";
@@ -52,6 +53,16 @@ function App() {
             <ProtectedRoute>
               <PageTransition>
                 <DashboardSwitcher />
+              </PageTransition>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/triage"
+          element={
+            <ProtectedRoute role="PATIENT">
+              <PageTransition>
+                <TriagePage />
               </PageTransition>
             </ProtectedRoute>
           }
