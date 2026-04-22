@@ -26,6 +26,7 @@ interface AuthContextValue {
   loading: boolean;
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
+  registerDoctor: (payload: any) => Promise<void>;
   logout: () => void;
   isAuthorized: (requiredRole: string) => boolean;
 }
@@ -89,6 +90,40 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem(LOCAL_KEY, JSON.stringify(toStore));
   };
 
+  const registerDoctor = async (payload: any) => {
+    const res = await fetch("http://localhost:4000/api/register/doctor", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      throw new Error(data?.message || "Registration failed");
+    }
+
+    const { user: userData, token: userToken } = data;
+    console.debug("Session Token Secured:", userToken.substring(0, 10) + "...");
+
+    const loggedInUser: User = {
+      id: userData.id,
+      name: userData.name,
+      email: userData.email,
+      role: userData.role,
+      profile: userData.profile,
+      abhaId: userData.abhaId,
+    };
+
+    const token = data.token as string;
+
+    setUser(loggedInUser);
+    setToken(token);
+
+    const toStore: StoredAuth = { user: loggedInUser, token };
+    localStorage.setItem(LOCAL_KEY, JSON.stringify(toStore));
+  };
+
   const logout = () => {
     setUser(null);
     setToken(null);
@@ -100,7 +135,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, token, login, logout, isAuthorized }}>
+    <AuthContext.Provider value={{ user, loading, token, login, registerDoctor, logout, isAuthorized }}>
       {children}
     </AuthContext.Provider>
   );

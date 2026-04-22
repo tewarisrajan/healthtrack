@@ -3,6 +3,23 @@ import { useHealthTrack } from "../../context/HealthTrackContext";
 import toast from "react-hot-toast";
 import { type EmergencyProfile } from "../../types/models";
 
+const VisibilityToggle = ({ label, field, visibility, toggleVisibility }: { label: string, field: keyof (EmergencyProfile['visibility']), visibility: EmergencyProfile['visibility'], toggleVisibility: (key: keyof (EmergencyProfile['visibility'])) => void }) => (
+  <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-200/50 dark:border-slate-800/50">
+    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{label} Public Visibility</span>
+    <button
+      type="button"
+      onClick={() => toggleVisibility(field)}
+      className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${visibility[field] ? 'bg-teal-600' : 'bg-slate-300 dark:bg-slate-700'
+        }`}
+    >
+      <span
+        className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${visibility[field] ? 'translate-x-5' : 'translate-x-1'
+          }`}
+      />
+    </button>
+  </div>
+);
+
 export default function EmergencyCard() {
   const { emergencyProfile, updateEmergencyProfile } = useHealthTrack();
 
@@ -60,23 +77,6 @@ export default function EmergencyCard() {
   const hasRisks =
     (allergies && allergies.trim().length > 0) ||
     (conditions && conditions.trim().length > 0);
-
-  const VisibilityToggle = ({ label, field }: { label: string, field: keyof typeof visibility }) => (
-    <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-200/50 dark:border-slate-800/50">
-      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{label} Public Visibility</span>
-      <button
-        type="button"
-        onClick={() => toggleVisibility(field)}
-        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${visibility[field] ? 'bg-teal-600' : 'bg-slate-300 dark:bg-slate-700'
-          }`}
-      >
-        <span
-          className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${visibility[field] ? 'translate-x-5' : 'translate-x-1'
-            }`}
-        />
-      </button>
-    </div>
-  );
 
   return (
     <div className="glass-panel p-6 rounded-3xl space-y-6">
@@ -151,11 +151,11 @@ export default function EmergencyCard() {
             Privacy Control (Public QR)
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <VisibilityToggle label="Blood" field="bloodGroup" />
-            <VisibilityToggle label="Allergies" field="allergies" />
-            <VisibilityToggle label="Chronic" field="chronicConditions" />
-            <VisibilityToggle label="Meds" field="medications" />
-            <VisibilityToggle label="Contacts" field="emergencyContacts" />
+            <VisibilityToggle label="Blood" field="bloodGroup" visibility={visibility} toggleVisibility={toggleVisibility} />
+            <VisibilityToggle label="Allergies" field="allergies" visibility={visibility} toggleVisibility={toggleVisibility} />
+            <VisibilityToggle label="Chronic" field="chronicConditions" visibility={visibility} toggleVisibility={toggleVisibility} />
+            <VisibilityToggle label="Meds" field="medications" visibility={visibility} toggleVisibility={toggleVisibility} />
+            <VisibilityToggle label="Contacts" field="emergencyContacts" visibility={visibility} toggleVisibility={toggleVisibility} />
           </div>
         </div>
 

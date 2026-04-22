@@ -12,13 +12,6 @@ export default function RecordDetailsPage() {
 
   const record = records.find((r) => r.id === id);
 
-  useEffect(() => {
-    if (id) {
-      logRecordAccess(id, "VIEWED");
-      loadLogs();
-    }
-  }, [id]);
-
   const loadLogs = async () => {
     if (!id) return;
     setLogsLoading(true);
@@ -26,6 +19,13 @@ export default function RecordDetailsPage() {
     setAuditLogs(logs);
     setLogsLoading(false);
   };
+
+  useEffect(() => {
+    if (id) {
+      logRecordAccess(id, "VIEWED");
+      loadLogs();
+    }
+  }, [id, logRecordAccess]);
 
   if (!record) {
     return (

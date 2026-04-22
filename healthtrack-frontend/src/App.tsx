@@ -10,6 +10,7 @@ import ConsentPage from "./routes/ConsentPage";
 import FamilyPage from "./routes/FamilyPage";
 import SettingsPage from "./routes/SettingsPage";
 import LoginPage from "./routes/LoginPage";
+import RegisterPage from "./routes/RegisterPage";
 import { useAuth } from "./context/AuthContext";
 import PublicProfilePage from "./routes/PublicProfilePage";
 import DashboardSwitcher from "./routes/DashboardSwitcher";
@@ -21,7 +22,7 @@ function App() {
   const location = useLocation();
 
   // Handle public routes that don't require authentication
-  const isPublicRoute = location.pathname.startsWith("/public/");
+  const isPublicRoute = location.pathname.startsWith("/public/") || location.pathname === "/register";
 
   // While we check localStorage, show a small loader
   if (loading) {
@@ -42,6 +43,7 @@ function App() {
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<Navigate to="/dashboard" />} />
+        <Route path="/register" element={<RegisterPage />} />
         <Route path="/public/emergency/:publicId" element={<PublicProfilePage />} />
 
         <Route

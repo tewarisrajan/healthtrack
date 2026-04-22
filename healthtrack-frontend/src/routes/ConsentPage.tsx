@@ -11,7 +11,9 @@ export default function ConsentPage() {
       fetchConsents?.();
     }, 10000);
     return () => clearInterval(interval);
+  }, [fetchConsents]);
 
+  const handleUpdate = async (id: string, status: "APPROVED" | "REJECTED") => {
     try {
       await respondToConsent(id, status);
     } catch (err) {

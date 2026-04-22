@@ -6,7 +6,8 @@ export type RecordType =
   | "LAB_REPORT"
   | "SCAN"
   | "CERTIFICATE"
-  | "VACCINATION";
+  | "VACCINATION"
+  | "BILL";
 
 // A single health record in the vault
 export interface HealthRecord {
@@ -61,3 +62,24 @@ export interface FamilyMember {
   age: number;
   hasEmergencyProfile: boolean;
 }
+
+export interface Patient {
+  id: string;
+  name: string;
+  email: string;
+  consentStatus: "NONE" | "PENDING" | "APPROVED" | "REJECTED";
+}
+
+export interface DashboardStats {
+  totalPatients: number;
+  activeConsents: number;
+  pendingRequests: number;
+  todaysAppointments: number;
+  recentActivity: {
+    id: string;
+    patientName: string;
+    status: string;
+    updatedAt: string;
+  }[];
+}
+

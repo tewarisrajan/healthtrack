@@ -1,5 +1,6 @@
 const crypto = require("crypto");
 const EmergencyProfile = require("../models/EmergencyProfile");
+const User = require("../models/User");
 
 // GET /api/emergency/:userId
 const getEmergencyProfile = async (req, res) => {
@@ -27,17 +28,23 @@ const getEmergencyProfile = async (req, res) => {
 
 // GET /api/emergency/public/:publicId
 const getPublicProfile = async (req, res) => {
-    const { publicId } = req.params;
+    let { publicId } = req.params;
+    if (publicId) publicId = publicId.trim();
+
+    console.log(`[DEBUG] getPublicProfile request for publicId: "${publicId}"`);
 
     try {
         const profile = await EmergencyProfile.findOneAsync({ publicId });
 
         if (!profile) {
+            console.log(`[DEBUG] Profile not found for publicId: "${publicId}"`);
             return res.status(404).json({
                 success: false,
-                message: "Public profile not found",
+                message: "Emergency profile not found (404)",
             });
         }
+
+        console.log(`[DEBUG] Profile found for "${publicId}": ${profile.name}`);
 
         // Return only critical, non-sensitive data, filtered by visibility
         const visibility = profile.visibility || {
@@ -79,10 +86,17 @@ const updateEmergencyProfile = async (req, res) => {
         const existing = await EmergencyProfile.findOneAsync({ user: userId });
         const publicId = existing?.publicId || crypto.randomBytes(6).toString("hex");
 
+        // If name is missing, try to get it from User model
+        let name = body.name;
+        if (!name) {
+            const user = await User.findOneAsync({ _id: userId });
+            name = user?.name || "User";
+        }
+
         const profileData = {
             user: userId,
             publicId,
-            name: body.name || "User",
+            name: name,
             bloodGroup: body.bloodGroup || "Pending",
             allergies: body.allergies || [],
             chronicConditions: body.chronicConditions || [],

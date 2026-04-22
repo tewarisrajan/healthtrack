@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { ArrowLeft, FileText, Calendar, ShieldCheck, AlertCircle } from "lucide-react";
 import type { HealthRecord } from "../types/models";
+import { API_BASE_URL } from "../config";
 
 export default function DoctorPatientView() {
     const { patientId } = useParams();
@@ -16,7 +17,7 @@ export default function DoctorPatientView() {
     useEffect(() => {
         const fetchRecords = async () => {
             try {
-                const res = await fetch(`http://localhost:4000/api/doctor/patients/${patientId}/records`, {
+                const res = await fetch(`${API_BASE_URL}/doctor/patients/${patientId}/records`, {
                     headers: token ? { Authorization: `Bearer ${token}` } : undefined
                 });
                 const data = await res.json();
@@ -105,7 +106,7 @@ export default function DoctorPatientView() {
                                 </span>
                                 {record.fileUrl && (
                                     <a
-                                        href={record.fileUrl.startsWith('http') ? record.fileUrl : `http://localhost:4000${record.fileUrl}`}
+                                        href={record.fileUrl.startsWith('http') ? record.fileUrl : `${API_BASE_URL.replace('/api', '')}${record.fileUrl}`}
                                         target="_blank"
                                         rel="noreferrer"
                                         className="text-teal-600 font-bold hover:underline ml-auto"

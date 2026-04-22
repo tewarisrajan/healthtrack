@@ -1,5 +1,6 @@
 // src/routes/LoginPage.tsx
 import { type FormEvent, useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function LoginPage() {
@@ -75,6 +76,9 @@ export default function LoginPage() {
 
         <p className="text-[11px] text-slate-500 dark:text-slate-400 text-center">
           Demo user: <b>demo@healthtrack.com</b> / <b>demo123</b>
+        </p>
+        <p className="text-[12px] text-slate-500 dark:text-slate-400 text-center mt-2 pt-4 border-t border-slate-200 dark:border-slate-800">
+          Are you a Doctor? <Link to="/register" className="text-teal-600 dark:text-teal-400 hover:underline">Register your ID</Link>
         </p>
       </div>
     </div>

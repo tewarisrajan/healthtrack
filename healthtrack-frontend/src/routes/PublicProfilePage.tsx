@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Phone, AlertCircle, Droplets, ShieldAlert, Clock, MapPin, Share2 } from "lucide-react";
+import { AlertCircle, Clock, Droplets, MapPin, Phone, Share2, ShieldAlert } from "lucide-react";
+import { API_BASE_URL } from "../config";
 
 interface EmergencyInfo {
     name: string;
@@ -22,7 +23,7 @@ export default function PublicProfilePage() {
     useEffect(() => {
         async function fetchInfo() {
             try {
-                const res = await fetch(`http://localhost:4000/api/public/emergency/${publicId}`);
+                const res = await fetch(`${API_BASE_URL}/public/emergency/${publicId}`);
                 const data = await res.json();
                 if (data.success) {
                     setInfo(data.data);
@@ -81,7 +82,11 @@ export default function PublicProfilePage() {
                     </div>
                     <div>
                         <h1 className="text-3xl font-black text-white uppercase tracking-tight">Record Restricted</h1>
-                        <p className="text-slate-400 mt-2 leading-relaxed">This emergency profile is either inactive or the link has expired. Please verify with the patient's ID card.</p>
+                        <p className="text-slate-400 mt-2 leading-relaxed">
+                            {error || "This emergency profile is either inactive or the link has expired."}
+                            <br />
+                            <span className="text-[10px] opacity-50 uppercase mt-2 block">Ref: {publicId}</span>
+                        </p>
                     </div>
                     <button onClick={() => window.location.reload()} className="px-8 py-3 bg-slate-800 text-white rounded-2xl font-bold hover:bg-slate-700 transition-all border border-slate-700">
                         Try Again

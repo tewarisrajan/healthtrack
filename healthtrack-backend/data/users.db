@@ -3,3 +3,4 @@
 {"name":"Demo User","email":"demo@healthtrack.com","password":"demo123","role":"PATIENT","abhaId":"12-3456-7890-1234","_id":"DSHaidCF8JuKb5QF"}
 {"$$indexCreated":{"fieldName":"email","unique":true,"sparse":false}}
 {"$$indexCreated":{"fieldName":"email","unique":true}}
+{"name":"Dr. John Doe","email":"doctor@example.com","password":"doctor123","role":"DOCTOR","profile":{"specialization":"Cardiologist","hospital":"General Hospital","licenseNumber":"MED-12345"},"_id":"88cxqDGCzDNuj7mk"}

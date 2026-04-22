@@ -12,6 +12,7 @@ const recordTypes: RecordType[] = [
   "SCAN",
   "CERTIFICATE",
   "VACCINATION",
+  "BILL",
 ];
 
 export default function UploadRecordPage() {
