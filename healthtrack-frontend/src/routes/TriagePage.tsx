@@ -54,6 +54,21 @@ export default function TriagePage() {
           ...prev,
           { id: (Date.now() + 1).toString(), role: data.data.role, content: data.data.content },
         ]);
+      } else {
+        console.error("AI Error Detailed:", data);
+        
+        // Handle unauthorized / token errors explicitly
+        if (res.status === 401) {
+            setMessages((prev) => [
+              ...prev,
+              { id: Date.now().toString(), role: "ai", content: `⚠️ Authentication Error: Your session has expired. Please log out and log in again.` },
+            ]);
+        } else {
+            setMessages((prev) => [
+              ...prev,
+              { id: Date.now().toString(), role: "ai", content: `⚠️ AI Error: ${data.details || data.error || data.message || "The AI is currently unavailable."}` },
+            ]);
+        }
       }
     } catch (error) {
       console.error("Error communicating with AI:", error);

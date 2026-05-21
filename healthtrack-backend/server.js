@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const seedData = require("./utils/seed");
+// AI Assistant Integration Updated
 
 // Routes
 const authRoutes = require("./routes/authRoutes");
