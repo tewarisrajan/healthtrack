@@ -17,6 +17,8 @@ import TriagePage from "./routes/TriagePage";
 import DashboardSwitcher from "./routes/DashboardSwitcher";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import DoctorPatientView from "./routes/DoctorPatientView";
+import FacilityManagement from "./routes/FacilityManagement";
+import FacilityStaff from "./routes/FacilityStaff";
 
 function App() {
   const { user, loading } = useAuth();
@@ -150,8 +152,27 @@ function App() {
           }
         />
         <Route path="/patients" element={<ProtectedRoute role="DOCTOR"><div>Patient Search View</div></ProtectedRoute>} />
-        {/* Placeholder Provider Routes */}
-        <Route path="/management" element={<ProtectedRoute role="PROVIDER"><div>Facility Management</div></ProtectedRoute>} />
+        {/* Provider Routes */}
+        <Route 
+          path="/management" 
+          element={
+            <ProtectedRoute role="PROVIDER">
+              <PageTransition>
+                <FacilityManagement />
+              </PageTransition>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/staff" 
+          element={
+            <ProtectedRoute role="PROVIDER">
+              <PageTransition>
+                <FacilityStaff />
+              </PageTransition>
+            </ProtectedRoute>
+          } 
+        />
       </Routes>
     </AnimatePresence>
   );

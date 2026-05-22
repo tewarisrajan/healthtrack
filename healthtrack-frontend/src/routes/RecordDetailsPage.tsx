@@ -5,10 +5,23 @@ import { motion } from "framer-motion";
 
 export default function RecordDetailsPage() {
   const { id } = useParams<{ id: string }>();
-  const { records, logRecordAccess, fetchAuditLogs } = useHealthTrack();
+  const { records, logRecordAccess, fetchAuditLogs, extractInsights } = useHealthTrack();
   const navigate = useNavigate();
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [logsLoading, setLogsLoading] = useState(true);
+  const [isExtracting, setIsExtracting] = useState(false);
+
+  const handleExtractInsights = async () => {
+    if (!id) return;
+    setIsExtracting(true);
+    try {
+      await extractInsights(id);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsExtracting(false);
+    }
+  };
 
   const record = records.find((r) => r.id === id);
 
@@ -157,22 +170,101 @@ export default function RecordDetailsPage() {
                   </div>
                   <h4 className="text-lg font-bold text-slate-800 dark:text-slate-100 tracking-tight">AI Insights & Extraction</h4>
                 </div>
-                <button 
-                  onClick={() => navigate('/triage')}
-                  className="px-4 py-2 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-bold hover:bg-indigo-500/20 transition-all"
-                >
-                  Ask AI About This
-                </button>
-              </div>
-
-              <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-teal-500 rounded-3xl blur opacity-5 group-hover:opacity-10 transition duration-1000"></div>
-                <div className="relative p-8 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-inner">
-                  <p className="text-sm text-slate-600 dark:text-slate-300 whitespace-pre-wrap font-mono leading-relaxed max-h-[400px] overflow-y-auto custom-scrollbar pr-4">
-                    {record.extractedText}
-                  </p>
+                <div className="flex gap-2">
+                  {!record.structuredData && (
+                    <button 
+                      onClick={handleExtractInsights}
+                      disabled={isExtracting}
+                      className="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700 transition-all shadow-md shadow-indigo-900/20 disabled:opacity-50 flex items-center gap-2"
+                    >
+                      {isExtracting ? (
+                        <>
+                          <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                          Analyzing...
+                        </>
+                      ) : (
+                        "Extract AI Insights"
+                      )}
+                    </button>
+                  )}
+                  <button 
+                    onClick={() => navigate('/triage')}
+                    className="px-4 py-2 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-bold hover:bg-indigo-500/20 transition-all"
+                  >
+                    Ask AI About This
+                  </button>
                 </div>
               </div>
+
+              {record.structuredData ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {record.structuredData.vitals && record.structuredData.vitals.length > 0 && (
+                    <div className="p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                      <h5 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-3">Vitals</h5>
+                      <ul className="space-y-2">
+                        {record.structuredData.vitals.map((v: any, i: number) => (
+                          <li key={i} className="flex justify-between items-center text-sm">
+                            <span className="text-slate-800 dark:text-slate-200 font-medium">{v.name}</span>
+                            <span className="text-indigo-600 dark:text-indigo-400 font-bold">{v.value} {v.unit}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {record.structuredData.medications && record.structuredData.medications.length > 0 && (
+                    <div className="p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                      <h5 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-3">Medications</h5>
+                      <ul className="space-y-2">
+                        {record.structuredData.medications.map((m: any, i: number) => (
+                          <li key={i} className="flex flex-col text-sm border-b border-slate-100 dark:border-slate-800 last:border-0 pb-2 last:pb-0">
+                            <span className="text-slate-800 dark:text-slate-200 font-bold">{m.name}</span>
+                            <span className="text-slate-500 dark:text-slate-400 text-xs">{m.dosage} • {m.frequency}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {record.structuredData.diagnoses && record.structuredData.diagnoses.length > 0 && (
+                    <div className="p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm md:col-span-2">
+                      <h5 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-3">Diagnoses</h5>
+                      <div className="flex flex-wrap gap-2">
+                        {record.structuredData.diagnoses.map((d: string, i: number) => (
+                          <span key={i} className="px-3 py-1 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded-lg font-medium border border-red-100 dark:border-red-900/30">
+                            {d}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {record.structuredData.keyFindings && record.structuredData.keyFindings.length > 0 && (
+                    <div className="p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm md:col-span-2">
+                      <h5 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-3">Key Findings</h5>
+                      <ul className="list-disc pl-5 space-y-1">
+                        {record.structuredData.keyFindings.map((f: string, i: number) => (
+                          <li key={i} className="text-sm text-slate-700 dark:text-slate-300">{f}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  <div className="md:col-span-2 mt-4">
+                    <h5 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Raw Text Record</h5>
+                    <div className="relative p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 whitespace-pre-wrap font-mono leading-relaxed max-h-[150px] overflow-y-auto custom-scrollbar pr-2">
+                        {record.extractedText}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="relative group">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-teal-500 rounded-3xl blur opacity-5 group-hover:opacity-10 transition duration-1000"></div>
+                  <div className="relative p-8 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-inner">
+                    <p className="text-sm text-slate-600 dark:text-slate-300 whitespace-pre-wrap font-mono leading-relaxed max-h-[400px] overflow-y-auto custom-scrollbar pr-4">
+                      {record.extractedText}
+                    </p>
+                  </div>
+                </div>
+              )}
 
               <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                 <span>Processed via OCR Engine v1.1</span>

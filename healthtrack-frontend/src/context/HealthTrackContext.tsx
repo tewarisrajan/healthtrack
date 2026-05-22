@@ -43,6 +43,7 @@ interface HealthTrackContextValue {
   fetchAuditLogs: (recordId: string) => Promise<any[]>;
   respondToConsent: (requestId: string, status: "APPROVED" | "REJECTED") => Promise<void>;
   fetchConsents: () => Promise<void>;
+  extractInsights: (recordId: string) => Promise<void>;
 }
 
 const HealthTrackContext = createContext<
@@ -320,6 +321,25 @@ export const HealthTrackProvider = ({ children }: { children: ReactNode }) => {
     setConsentRequests(prev => prev.filter(r => r.id !== requestId));
   };
 
+  const extractInsights = async (recordId: string) => {
+    if (!user) throw new Error("Not logged in");
+
+    const res = await fetch(`http://localhost:4000/api/ai/extract-structured/${recordId}`, {
+      method: "POST",
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data?.message || "Failed to extract insights");
+
+    // Update the local record with the new structured data
+    setRecords((prev) =>
+      prev.map((r) => (r.id === recordId ? data.data : r))
+    );
+  };
+
   return (
     <HealthTrackContext.Provider
       value={{
@@ -337,7 +357,8 @@ export const HealthTrackProvider = ({ children }: { children: ReactNode }) => {
         logRecordAccess,
         fetchAuditLogs,
         respondToConsent,
-        fetchConsents
+        fetchConsents,
+        extractInsights
       }}
     >
       {children}

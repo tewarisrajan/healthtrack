@@ -41,8 +41,10 @@ app.use("/api/ai", aiRoutes);
 // New Modules
 const doctorRoutes = require("./routes/doctorRoutes");
 const consentRoutes = require("./routes/consentRoutes");
+const providerRoutes = require("./routes/providerRoutes");
 app.use("/api/doctor", doctorRoutes);
 app.use("/api/consent", consentRoutes);
+app.use("/api/provider", providerRoutes);
 
 // 404 Catch-all
 app.use((req, res, next) => {

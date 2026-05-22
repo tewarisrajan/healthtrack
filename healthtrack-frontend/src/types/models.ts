@@ -21,6 +21,7 @@ export interface HealthRecord {
   fileHash?: string | null;   // SHA-256 fingerprint
   extractedText?: string | null; // Parsed text from OCR/PDF
   blockchainVerified?: boolean;
+  structuredData?: any;       // Extracted structured insights
 }
 
 // 🔹 This is the one causing the error if missing
